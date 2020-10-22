@@ -1,0 +1,149 @@
+
+replace config.config.inc.php part with this:
+
+mysql> create database dvwa;
+Query OK, 1 row affected (0.00 sec)
+
+mysql> grant all on dvwa.* to dvwa@localhost identified by 'test123';
+Query OK, 0 rows affected, 1 warning (0.01 sec)
+
+mysql> flush privileges;
+Query OK, 0 rows affected (0.00 sec)
+
+You will then need to update the config file ./config/config.inc.php
+
+Add repository to get php5.6
+
+Run the following command to add the repository to get PHP 5.6 to work on Ubuntu 16.04. DVWA requires this version of PHP as it was written for it. The DVWA app itself would need to be rewritten for later versions of PHP; thus in the meantime, do this.
+
+    sudo add-apt-repository ppa:ondrej/php
+
+Update and install
+
+After installing the new repo, let's update what packages apt-get will discover and install the necessary packages for PHP5.6
+
+    sudo apt-get update
+    sudo apt-get install php5.6 php5.6-mbstring php5.6-mcrypt php5.6-mysql php5.6-xml php5.6-gd
+
+Install mysql
+
+Time to install MySQL
+
+    sudo apt-get install mysql-server
+
+Remember password for root of mysql (we use it later)
+Install Git (to pull down DVWA)
+
+We will use Git to pull down DVWA via GitHub, so first, of course, we need git!
+
+    sudo apt-get install git
+
+Clone DVWA against GitHub
+
+Now let's pull down the bits…
+
+    cd /var/www/html
+    sudo git clone https://github.com/ethicalhack3r/DVWA
+
+Modify DVWA settings for MySQL permissions
+
+Time to configure DVWA to know about our MySQL settings
+
+    cd DVWA/
+    sudo vi config/config.inc.php.dist
+
+Modify 'db_password' parameter for MySQL password (from step 5):
+
+Modify permissions to give Apache privileges to traverse directory
+
+In order for Apache to have permissions to present or even execute any of the PHP code (the DVWA itself!), we need to give it permissions. Since this is "damn vulnerable", let's make it even more so with a chmod 777
+
+    sudo chmod -R 777 /var/www/html/DVWA
+
+Move the PHP Config file
+
+Now let's move our configured DVWA file to a file that makes it of value… (done by the DVWA folks on purpose…):
+
+    cp config/config.inc.php.dist config/config.inc.php
+
+Set apache's Server Name
+
+We need Apache to stop complaining about not knowing its Fully Qualified Domain Name (FQDN). Let's give it just what it wants…
+
+    sudo vi /etc/apache2/apache2.conf
+
+Configure PHP to enable Apache URL Includes
+
+Configure to enable PHP to support "allow_url_encodes". This is necessary for the DVWA to work.
+
+    sudo vi /etc/php/5.6/apache2/php.ini
+    Find "allow_url_include" parameter and set it to "On" (line 835)
+
+Restart Apache
+
+Now that we made changes, specifically around PHP and the permissions in the DVWA folder, we should restart the Apache service.
+
+    sudo /etc/init.d/apache2 restart
+
+Ensure Azure NSG can forward HTTP traffic to this machine
+
+All should be good. Now we just need to configure Azure to make this HTTP endpoint routable via the Network Security Group of the VM. Go to the NSG mapped to this VM and make the following changes:
+
+    Add to inbound security rules for HTTP traffic
+
+Your inbound rule policies should now look like this:
+
+Traverse in browser to public IP of Ubuntu machine
+
+Almost done, now we just need to head to the location we just configured everything. Go to the site's URL, adding /DVWA to it. It will forward you to the setup.php url below (knowing the application needs to be setup still).
+
+
+
+#not sure this worked
+
+$ sudo apt install mysql-server
+$ sudo cat /etc/mysql/debian.cnf
+
+Note the lines which read:
+
+user     = debian-sys-maint
+password = blahblahblah
+
+Then:
+
+$ mysql -u debian-sys-maint -p
+Enter password: // type 'blahblahblah', ie. password from debian.cnf
+
+mysql> USE mysql
+mysql> SELECT User, Host, plugin FROM mysql.user;
++------------------+-----------+-----------------------+
+| User             | Host      | plugin                |
++------------------+-----------+-----------------------+
+| root             | localhost | auth_socket           |
+| mysql.session    | localhost | mysql_native_password |
+| mysql.sys        | localhost | mysql_native_password |
+| debian-sys-maint | localhost | mysql_native_password |
++------------------+-----------+-----------------------+
+4 rows in set (0.00 sec)
+
+mysql> UPDATE user SET plugin='mysql_native_password' WHERE User='root';
+mysql> COMMIT;  // When you don't have auto-commit switched on
+
+Either:
+
+mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_password';
+
+Or:
+
+// For MySQL 5.7+
+UPDATE mysql.user SET authentication_string=PASSWORD('new_password') where user='root';
+
+Then:
+
+mysql> FLUSH PRIVILEGES;
+mysql> COMMIT;  // When you don't have auto-commit switched on
+mysql> EXIT
+
+$ sudo service mysql restart
+$ mysql -u root -p
+Enter password: // Yay! 'new_password' now works!

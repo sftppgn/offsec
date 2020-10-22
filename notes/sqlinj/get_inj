@@ -1,0 +1,6 @@
+wget http://pentestmonkey.net/cheat-sheet/sql-injection/postgres-sql-injection-cheat-sheet;
+wget http://pentestmonkey.net/cheat-sheet/sql-injection/ingres-sql-injection-cheat-sheet;
+wget http://pentestmonkey.net/cheat-sheet/sql-injection/db2-sql-injection-cheat-sheet;
+wget http://pentestmonkey.net/cheat-sheet/sql-injection/informix-sql-injection-cheat-sheet;
+wget http://pentestmonkey.net/cheat-sheet/sql-injection/oracle-sql-injection-cheat-sheet;
+wget http://pentestmonkey.net/cheat-sheet/sql-injection/mssql-sql-injection-cheat-sheet;

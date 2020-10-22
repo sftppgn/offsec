@@ -1,0 +1,37 @@
+PLT - procedure linking table
+GOT - global offset table
+
+PLT contains group of assembly instructions (trampolines) per library function, that executes when a function is called.
+GOT contains list of absolute addresses, initialized at prog start to point to pushq instruction inside the PLT
+
+this is an example:
+
+PLT1: jmp *name1@GOTPCREL(%rip)
+      pushq $index1
+      jmp .PLT0
+	  
+dynamic linker takes data arranged by trampoline and finds the addr of the function that the prog is trying to call
+addr is written to GOT, execution is xfered to the function
+subsequent calls to the function use PLT calls directly to the function using the addr stored in GOT
+ltrace inserts itself by setting a breakpoint in the PLT entry
+
+in amd64, 'int $3' is a software breakpoint
+
+ptrace system call takes a request arg that can be set to PTRACE_POKETEXT - this lets the prog calling ptrace modify mem in a running proc
+debuggers/tracers can use PTRACE_POKETEXT to write int $3 to set a breakpoint
+
+ltrace:
+attaches to the prog with ptrace
+locates PLT of the prog
+uses ptrace with PTRACE_POKETEXT to overwrite assembly trampolines with int $3
+reumes execution
+
+when prog makes lib call:
+prog executes int $3, the breakpoint
+kernel handler for int $3 runs
+kernel notifies ltrace that SIGTRAP is pending
+ltrace examines prog to determine which lib call it was making, and prints info - call time, args, time stamps, other data
+ltrace replaces int $3 with original code using PTRACE_POKETEXT again so prog can resume
+
+https://blog.packagecloud.io/eng/2016/03/14/how-does-ltrace-work/
+https://blog.packagecloud.io/eng/2016/02/29/how-does-strace-work/

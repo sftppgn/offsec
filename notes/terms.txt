@@ -1,0 +1,238 @@
+general definitions, some technical some business only
+
+watering hole - targetting not the org, but other activities employees engage in    
+xss - arbitrary js/code execution
+xsrq - something the user could ordinarily do but didn't intend to
+amplification - ddos
+domain hijacking - redirecting dns
+typo squatting - reserving similarly named domains
+
+shimming - running apps designed for old versions of windows to get around security
+refactoring - reordering malware functions, adding nops, etc. to avoid AV detection
+
+IV - initialization vector - random is added to the encryption key in wireless tx
+
+bluejacking - sending unwanted messages with bluteooth
+bluesnarfing - connecting to device and downloading or altering things
+bluebugging - full control of device, call forwarding etc.
+nfc - nearfield communication
+
+birthday attack - finding data that returns the same hash resulting in a collision
+
+
+transport mode - data is encrypted, ipsec header and trailer attached, original IP header used to get data to remote site
+tunnel mode - header and data are encrypted, ipsec header and trailer
+AH - authention header - take IP header and data with shared key, then compute hash, usually based on MD5, SHA-1 or SHA-2
+ESP - encapsulation security payload - 3DES or usually AES - adds a header, trailer, and integrity check value - the trailer is encrypted, you have a new 
+ESP encrypted: IP header, data, ESP trailer
+ESP unencrypted: new IP header, ESP header, integrity check value
+full tunnel - all traffic will go through the tunnel by virtue of connected destination
+split tunnel - traffic will traverse the tunnel but the end point requires connection outside of the entity that the VPN is connecting to.
+TLS - vpn over port 443 browser builtin
+floods - syn flood, 
+proxy
+load balancer
+
+utm - unified threat management device / poossibru/probibru web gateway
+dlp - data loss prevention
+dep - data execution prevention
+satcom - satellite communications
+nfc - nearfield comms
+ant - 2.4ghz range, typically IOT, low power devices, encryption optional, 
+geofencing - using gps or rfid
+push notification services - sent when app isn't open
+context-aware auth - checking if things were previously used like IP, location, other device pairing
+sideloading - installing 3rd party apps
+cope - corporate owned personally enabled
+cyod - choose your own device
+vdi - desktop image delivered over network to an end device - could be traditional pc, thin client, or mobile dev
+dnssec - auth, auth denial of existence, integrity, but not confidentiality or availability
+s/mime - crypto for email - auth, integrity, origin, privacy, security(crypto)
+srtp - RTP(VOIP with SIP) with encryption, message auth and integrity, replay attack for both multi and unicast
+ldaps port number 636, or 1636 when running as "regular user"
+
+
+3 architecture
+regulatory HIPPA
+non-regulatory COBIT
+vendor diversity - implementing controls from diff vendors
+control diversity - diff types of controls - tech like firewall, physical like locks, admin like vuln assessment/pen test
+honeynet - fake network
+NIDS sensors/collectors - gather info, report to monitoring server hosting NIDS console
+NIDS typically unable to decrypt traffic
+FDE - full disk encryption
+SED - self encrypting drive
+TPM - chip for laptops and some mobile devs, provides FDE, secure boot process, TPMs have an encryption key burned into them
+HSM - generates/stores encryption keys
+uefi - same as bios, can boot from larger disks and is cpu independent
+secure boot - checking system files during boot process
+trusted os - focus on authentication and authorization, required to meet common criterea, uses mandatory access control (MAC) model
+ics - industiral control system
+scada - supervisory control and data acquisition system - controls ics
+SoC - system on a chip, used by IOT devices
+rtos - realtime OS - reacts to input in a specific time, typically throws error if timelimit exceeded - example is assmebly line equipment 
+continuous integration - merging code changes to a central repo with version control, software is built from the central repo
+baselining - applying changes every day, recompiling, and testing code
+immutable systems - no changes possible
+infrastructure as code - example was deploying vms from scripts
+mantrap - turnstile, 2 sets of doors, etc.
+authentication
+authorization
+accounting
+federation - centralized id mgmt - shibboleth is one open source example
+oauth - open standard for auth - can use google, facebook, paypal pws, etc.
+openid connect - connects to oauth 2.0 and allows clients to vrfy end users without managing creds
+MS recommnds kerberos, if not available then ntlmv2 or ntlm
+AD based on ldap
+ldap based on earlier version of x.500
+kerberos used in AD and unix "realms" - mutual auth, 
+kerb 5 requires systems to be time syncd within 5 min - limits replay attacks to 5 min
+kerb uses db - AD in MS but could be anything
+kerb uses symmetric encryption
+tacacs is cisco proprietary
+pap - cleartext
+chap - handshake, server challenges client, uses hashed shared secret with nonce - number used once
+ms-chap, ms-chapv2 - v2 mutual auth
+radius - encrypts pws but not entire exchange, typically queries DC
+radius is udp  with pw crypto only, tacacs is tcp with full crypto
+diameter - radius alternative
+dac - discretionary access control - obj has owner, owner determines access - nfts / unix
+sid/dacl - MS assoc's user and group with SID
+dacl - dac list, who can access using dac, made of ACEs
+abac - attribute based access control - like group policy groups
+abac - subject, object, action, env(context like time, loc, crypto)
+mac - mandatory access control - admins assign labels to objs and users, used by selinux and military
+lattice - divides access into separate compartments
+labels - same as lattice
+role based - job function
+rule based - ACL in firewall, rules in IPS
+FAR - false acceptance rate
+FRR - false nonmatch rate
+CER - crossover error rate - lower = better
+hotp - hmac based one time pw - open standard for OTPs similar to token/key fob - uses secret and counter to create hash, converts result into 6-8 digit pin
+hotp theoretically can be used forever once requested, but only once
+totp - time based OTP - typically expires after 30 sec
+hotp/totp cost less than rsa/etc.
+
+
+5 
+isa - interconnection security agreement - all aspects of secure connection between 2 entities NIST SP 800-47 is one set of guidelines
+mou/moa - memorandum of understanding or agreement - statement of purpose to support ISA
+bpa - business partner agreement - shares of profits/losses each will take, responsibilities, what happens if they leave.
+clean desk policy
+AUP - acceptable use policy
+mtbf - mean time between failures
+
+privacy threshold assesment - identify pii in a system
+privacy impact assessment - risks related to pii
+
+5.3 start
+
+802.1x - radius
+
+risk assessment:
+SLE - single loss expectancy of 1 thing
+ARO - annual rate of occurance - % used if less than 1 per year
+ALE - annual loss expectancy - SLE*ARO
+asset value - can be specific or subjective based on process
+risk register - list of everything related to risk - category, likelihood, impact, risk score, mitigation steps, etc.
+quantitiative - asset values
+qualitative - subjective
+
+5.4
+CIRT - cyber incident response team
+incident response:
+prep, id, containment, eradication, recovery, lessons learned
+order of volatility:
+-kali capture ram - apps>forensics>volatility
+-clone disk image to examine
+cache, proc cache, hd cache
+ram
+paging file
+local disk
+remote sys
+archive media
+
+chain of custody - record of everyone in contact with physical asset collected as evidence
+legal hold - court order to maintain data as evidence
+
+data acqusition
+capture system image - contents of drive - dd - then make copy of dd, never access copy directly to avoid modification
+take hashes and verify them
+
+iv - initialization vector - attack attempts to discover psk - WEP
+steganography - hiding things in things, security by obscurity
+ECC - elliptic curve cryptography - used by small devices, takes less processing power, depricated
+asymmetric - public and private keys, requires PKI to issue certs, pub key decrypted by matching private and vice versa - DH
+stream cipher crypto 1 bit at a time
+static key semi-permanent - RSA, 
+ephemeral -  public/private key pairs
+perfect forward secrecy - random pub keys gend without a deterministic algorithm, no key reuse, used by ephemeral keys
+
+key stretching - salting pws with random bits to make them more complex - bcrypt and "PBKDF2" are examples
+bcrypt used for /etc/shadow
+argon2 recommended over pbkdf2
+crypto service provider is software library distributed in crypto modules which can be hardware software or firmware
+symmetric algorithms - aes, des, 3des, rc4
+asymmetric - box example, i sent you a box with a public key, i have the private key
+asymmetric algorithms - rsa, dsa, DH, pgp/gpg
+DHE/EDH - diffie-hellman ephemeral, diff keys for each session
+ECDHE - elliptic curve difie-hellman, static keys
+
+pgp uses rsa with pub/priv keys, it uses both asymmetric and symmetric crypto
+asymmetric crypto used for they key exchange, then symmetric to encrypt data
+
+hmac - hash based message auth code - adds an authenticity check/secret key to hash
+
+ripemd - race integrity primitives evaluation message digest
+xor - 2 inputs same = 0 diff =1
+confusion - crypto makes ciphertext significantly different
+diffusion - small changes in plaintext make large changes in crypto
+
+ccmp - cipher block chaining message auth protocol - encryption used by wpa2
+ccmp is based on aes
+wpa2 enterprise mode uses 802.1x radius
+auth protocols
+eap - pairwise master key PMK - use key to encrypt data, tkip and aes-based ccmp use this
+eap-fast - secure tunneling - optional certs, replacement for leap
+peap - protected eap - eap with TLS tunnel, requires server cert, common with mschapv2
+eap-ttls - tunnelled TLS - extension of peap, can be used with older auth methods like PAP
+eap-tls - secure and widely implemented, diff btwn peap and this is that we need client certs too
+radius federation - 2 entities/companies sharing ID mgmt system
+wps attacks try different PINs until it works - reaver is 1 open source tol used for this, in 10 hours or quicker
+
+captive portals - forcing clients to login/accept terms before using browser
+
+CA - certificate authorities
+root CA issues certs to intermediate CAs
+child CAs issue certs to devs/users
+
+procedure for requesting cert registration
+create pub/private key pair - openssl
+create CSR - certificate signing request contains - purpose of cert,website info, public key, and requester
+CSR formatted by public key encryption standards PKCS #10 - CA publishes cert template
+CA validates requester id, creates cert with pub key
+OIDs are used here to identify entities - specify ISO, id/not id,  IANA, and org specific trailer
+RA can assist CA in large orgs by gathering info 
+
+CRL - certificate revocation list
+OCSP - onine cert status protocol - returns good revoked or unknown
+
+certs use x.509v3 formats except revocation lists which use v2
+certs stored as binary files or base64 ascii
+
+DER certs are like ssh with ---begin and end--- header/footer
+CER are binary encoded and don't have header/footer
+PEM used for email only, but can be used for anything.  can be cer or der, 
+pem holding pub key typically uses .cer or .crt, priv key uses .key
+p7b use der for pub key, can contain cert chain or CRL
+p12 use cer for priv key, commonly encrypted, can contain cert cahin
+
+
+
+
+
+
+
+
+

